@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Business Card Generator</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#5D5CDE',
+                        secondary: '#F3F4F6',
+                        'dark-bg': '#181818',
+                        'light-bg': '#FFFFFF'
+                    }
+                }
+            }
+        }
+
+        // Dark mode detection
+        if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+            document.documentElement.classList.add('dark');
+        }
+        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', event => {
+            if (event.matches) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        });
+    </script>
+    <!-- Privacy-friendly analytics by Plausible -->
+<script async src="https://plausible.io/js/pa-W7xMl3CfM2lCfGDGosmPv.js"></script>
+<script>
+  window.plausible=window.plausible||function(){(plausible.q=plausible.q||[]).push(arguments)},plausible.init=plausible.init||function(i){plausible.o=i||{}};
+  plausible.init()
+</script>
+
+</head>
+<body class="bg-light-bg dark:bg-dark-bg text-gray-800 dark:text-gray-200 min-h-screen">
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-3xl font-bold text-center text-primary mb-6">Digital Business Card Generator</h1>
+        
+        <div class="grid md:grid-cols-2 gap-8">
+            <!-- Form Section -->
+            <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6">
+                <h2 class="text-xl font-semibold mb-4">Enter Your Details</h2>
+                
+                <form id="cardForm" class="space-y-4">
+                    <div>
+                        <label for="name" class="block mb-1">Full Name*</label>
+                        <input type="text" id="name" class="w-full px-4 py-2 rounded border border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-base" required>
+                    </div>
+                    
+                    <div>
+                        <label for="title" class="block mb-1">Job Title</label>
+                        <input type="text" id="title" class="w-full px-4 py-2 rounded border border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-base">
+                    </div>
+                    
+                    <div>
+                        <label for="company" class="block mb-1">Company</label>
+                        <input type="text" id="company" class="w-full px-4 py-2 rounded border border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-base">
+                    </div>
+                    
+                    <div>
+                        <label for="email" class="block mb-1">Email*</label>
+                        <input type="email" id="email" class="w-full px-4 py-2 rounded border border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-base" required>
+                    </div>
+                    
+                    <div>
+                        <label for="phone" class="block mb-1">Phone</label>
+                        <input type="tel" id="phone" class="w-full px-4 py-2 rounded border border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-base">
+                    </div>
+                    
+                    <div>
+                        <label for="website" class="block mb-1">Website</label>
+                        <input type="url" id="website" class="w-full px-4 py-2 rounded border border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-base" placeholder="https://example.com">
+                    </div>
+                    
+                    <div>
+                        <label for="linkedIn" class="block mb-1">LinkedIn</label>
+                        <input type="url" id="linkedIn" class="w-full px-4 py-2 rounded border border-gray-300 dark:border-gray-600 dark:bg-gray-700 text-base" placeholder="https://linkedin.com/in/username">
+                    </div>
+                    
+                    <div>
+                        <label class="block mb-2">Card Template</label>
+                        <div class="grid grid-cols-3 gap-3">
+                            <div class="template-option active" data-template="modern">
+                                <div class="aspect-[1.5/1] bg-gradient-to-r from-blue-500 to-primary rounded-md mb-1"></div>
+                                <span class="text-sm">Modern</span>
+                            </div>
+                            <div class="template-option" data-template="classic">
+                                <div class="aspect-[1.5/1] bg-gray-100 dark:bg-gray-700 border-2 border-primary rounded-md mb-1"></div>
+                                <span class="text-sm">Classic</span>
+                            </div>
+                            <div class="template-option" data-template="minimal">
+                                <div class="aspect-[1.5/1] bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 rounded-md mb-1"></div>
+                                <span class="text-sm">Minimal</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <label for="accentColor" class="block mb-1">Accent Color</label>
+                        <input type="color" id="accentColor" value="#5D5CDE" class="w-full h-10 rounded border border-gray-300 dark:border-gray-600">
+                    </div>
+                    
+                    <button type="submit" class="w-full bg-primary hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded transition-colors">
+                        Generate Business Card
+                    </button>
+                </form>
+            </div>
+            
+            <!-- Preview Section -->
+            <div>
+                <h2 class="text-xl font-semibold mb-4">Your Business Card</h2>
+                <div id="cardPreview" class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 mb-4 flex items-center justify-center">
+                    <div class="text-center text-gray-500 dark:text-gray-400">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="mx-auto h-12 w-12 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" />
+                        </svg>
+                        <p>Fill out the form and click "Generate Business Card" to create your card</p>
+                    </div>
+                </div>
+                
+                <div id="saveInstructions" class="bg-blue-50 dark:bg-blue-900/30 rounded-lg p-4 mb-4 hidden">
+                    <h3 class="font-semibold text-blue-800 dark:text-blue-300 mb-2">How to Save Your Card</h3>
+                    <ol class="list-decimal list-inside text-blue-700 dark:text-blue-200">
+                        <li>Right-click on your card</li>
+                        <li>Select "Save image as..."</li>
+                        <li>Choose a location and save</li>
+                    </ol>
+                </div>
+                
+                <div id="qrCodeContainer" class="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-6 text-center hidden">
+                    <h3 class="font-semibold mb-3">Scan this QR Code to save contact</h3>
+                    <div id="qrCode" class="inline-block bg-white p-2 rounded-md"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('cardForm');
+            const cardPreview = document.getElementById('cardPreview');
+            const saveInstructions = document.getElementById('saveInstructions');
+            const qrCodeContainer = document.getElementById('qrCodeContainer');
+            const qrCodeDiv = document.getElementById('qrCode');
+            let selectedTemplate = 'modern';
+            let cardElement = null;
+            
+            // Template selection
+            document.querySelectorAll('.template-option').forEach(option => {
+                option.addEventListener('click', () => {
+                    document.querySelectorAll('.template-option').forEach(opt => opt.classList.remove('active'));
+                    option.classList.add('active');
+                    selectedTemplate = option.dataset.template;
+                });
+            });
+            
+            // Apply custom styles to active template
+            const style = document.createElement('style');
+            document.head.appendChild(style);
+            style.textContent = `
+                .template-option {
+                    cursor: pointer;
+                    text-align: center;
+                    opacity: 0.7;
+                    transition: opacity 0.2s;
+                }
+                .template-option:hover {
+                    opacity: 0.9;
+                }
+                .template-option.active {
+                    opacity: 1;
+                }
+                .template-option.active > div {
+                    box-shadow: 0 0 0 2px #5D5CDE;
+                }
+                
+                /* Card templates */
+               /* General Styles */
+.business-card {
+    width: 100%;
+    max-width: 400px;
+    height: 225px;
+    position: relative;
+    overflow: hidden;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+    font-family: 'Inter', sans-serif;
+}
+
+/* Modern Template */
+.card-modern {
+    display: grid;
+    grid-template-columns: 1fr 100px;
+    color: white;
+    background: linear-gradient(135deg, #5D5CDE 0%, #4343C4 100%);
+}
+
+.card-modern .card-content {
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.card-modern .card-content h2 {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.card-modern .card-content p {
+    font-size: 0.85rem;
+    opacity: 0.85;
+}
+
+/* Classic Template */
+.card-classic {
+    background-color: white;
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #ddd;
+}
+
+.card-classic .card-header {
+    height: 40px;
+    padding: 0.5rem 1rem;
+    background-color: #5D5CDE;
+}
+
+.card-classic .card-content {
+    display: flex;
+    padding: 1rem;
+}
+
+.card-classic .card-details {
+    flex: 1;
+}
+
+.card-classic .card-details h2 {
+    font-size: 1.4rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+    color: #5D5CDE;
+}
+
+.card-classic .card-details p {
+    font-size: 0.85rem;
+    color: #666;
+}
+
+
+/* Minimal Template */
+.card-minimal {
+    background-color: white;
+    color: #333;
+    padding: 1.5rem;
+    display: flex;
+    border: 1px solid #ccc;
+}
+
+.card-minimal .card-details {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.card-minimal .card-details h2 {
+    font-size: 1.4rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+    position: relative;
+    display: inline-block;
+    color: #5D5CDE;
+}
+
+.card-minimal .card-details h2::after {
+    content: '';
+    display: block;
+    width: 40px;
+    height: 3px;
+    background-color: #5D5CDE;
+    position: absolute;
+    bottom: -8px;
+    left: 0;
+}
+
+.card-minimal .card-details p {
+    font-size: 0.85rem;
+    color: #666;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .business-card {
+        height: auto;
+        padding: 1rem;
+    }
+
+    .card-modern {
+        grid-template-columns: 1fr;
+        text-align: center;
+    }
+
+    .card-modern .card-qr {
+        justify-content: center;
+        padding: 1rem 0;
+    }
+
+    .card-classic .card-content {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .card-classic .card-qr {
+        justify-content: center;
+        padding: 1rem 0;
+    }
+
+    .card-minimal {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .card-minimal .card-qr {
+        justify-content: center;
+        padding-top: 1rem;
+    }
+}
+            `;
+            
+            // Generate vCard format for QR code
+            function generateVCard(data) {
+                let vCard = 'BEGIN:VCARD\nVERSION:3.0\n';
+                vCard += `FN:${data.name}\n`;
+                
+                if (data.title || data.company) {
+                    let org = data.company || '';
+                    vCard += `TITLE:${data.title || ''}\n`;
+                    vCard += `ORG:${org}\n`;
+                }
+                
+                if (data.email) vCard += `EMAIL:${data.email}\n`;
+                if (data.phone) vCard += `TEL:${data.phone}\n`;
+                if (data.website) vCard += `URL:${data.website}\n`;
+                
+                vCard += 'END:VCARD';
+                return vCard;
+            }
+            
+            // Generate QR code
+            function generateQRCode(data) {
+                qrCodeDiv.innerHTML = '';
+                new QRCode(qrCodeDiv, {
+                    text: generateVCard(data),
+                    width: 128,
+                    height: 128,
+                    colorDark: '#000000',
+                    colorLight: '#ffffff',
+                    correctLevel: QRCode.CorrectLevel.M
+                });
+                
+                qrCodeContainer.classList.remove('hidden');
+                return qrCodeDiv.querySelector('img').src;
+            }
+            
+            // Generate card HTML based on template
+            function generateCard(data, qrCodeUrl) {
+                const accentColor = data.accentColor || '#5D5CDE';
+                
+                let cardHTML = '';
+                
+                switch (selectedTemplate) {
+                    case 'modern':
+                        cardHTML = `
+                            <div class="business-card card-modern" style="background: linear-gradient(135deg, ${accentColor} 0%, ${adjustColor(accentColor, -40)} 100%)">
+                                <div class="card-content">
+                                    <h2 class="text-xl font-bold mb-1">${data.name}</h2>
+                                    ${data.title ? `<p class="text-sm opacity-90 mb-3">${data.title}${data.company ? ` · ${data.company}` : ''}</p>` : ''}
+                                    <div class="mt-2 text-sm opacity-90 space-y-1">
+                                        ${data.phone ? `<p><span class="inline-block w-5">📱</span> ${data.phone}</p>` : ''}
+                                        ${data.email ? `<p><span class="inline-block w-5">✉️</span> ${data.email}</p>` : ''}
+                                        ${data.website ? `<p><span class="inline-block w-5">🌐</span> ${formatUrl(data.website)}</p>` : ''}
+                                        ${data.linkedIn ? `<p><span class="inline-block w-5">🔗</span> ${formatUrl(data.linkedIn)}</p>` : ''}
+                                    </div>
+                                </div>
+                                <div class="card-qr">
+                                    <img src="${qrCodeUrl}" width="80" height="80" alt="Contact QR Code">
+                                </div>
+                            </div>
+                        `;
+                        break;
+                        
+                    case 'classic':
+                        cardHTML = `
+                            <div class="business-card card-classic">
+                                <div class="card-header" style="background-color: ${accentColor}"></div>
+                                <div class="card-content">
+                                    <div class="card-details">
+                                        <h2 class="text-xl font-bold mb-1" style="color: ${accentColor}">${data.name}</h2>
+                                        ${data.title ? `<p class="text-sm text-gray-700 mb-3">${data.title}${data.company ? ` · ${data.company}` : ''}</p>` : ''}
+                                        <div class="mt-3 text-sm text-gray-700 space-y-1">
+                                            ${data.phone ? `<p>📱 ${data.phone}</p>` : ''}
+                                            ${data.email ? `<p>✉️ ${data.email}</p>` : ''}
+                                            ${data.website ? `<p>🌐 ${formatUrl(data.website)}</p>` : ''}
+                                            ${data.linkedIn ? `<p>🔗 ${formatUrl(data.linkedIn)}</p>` : ''}
+                                        </div>
+                                    </div>
+                                    <div class="card-qr">
+                                        <img src="${qrCodeUrl}" width="80" height="80" alt="Contact QR Code">
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        break;
+                        
+                    case 'minimal':
+                        cardHTML = `
+                            <div class="business-card card-minimal">
+                                <div class="card-details">
+                                    <h2 class="text-xl font-bold mb-4 name" style="color: ${accentColor}">
+                                        ${data.name}
+                                        <style>
+                                            .card-minimal .name::after {
+                                                background-color: ${accentColor};
+                                            }
+                                        </style>
+                                    </h2>
+                                    ${data.title ? `<p class="text-sm text-gray-700 mb-3">${data.title}${data.company ? ` at ${data.company}` : ''}</p>` : ''}
+                                    <div class="mt-3 text-sm text-gray-700 space-y-1">
+                                        ${data.phone ? `<p>${data.phone}</p>` : ''}
+                                        ${data.email ? `<p>${data.email}</p>` : ''}
+                                        ${data.website ? `<p>${formatUrl(data.website)}</p>` : ''}
+                                        ${data.linkedIn ? `<p>${formatUrl(data.linkedIn)}</p>` : ''}
+                                    </div>
+                                </div>
+                                <div class="card-qr">
+                                    <img src="${qrCodeUrl}" width="80" height="80" alt="Contact QR Code">
+                                </div>
+                            </div>
+                        `;
+                        break;
+                }
+                
+                return cardHTML;
+            }
+            
+            // Helper to format URLs for display
+            function formatUrl(url) {
+                try {
+                    const urlObj = new URL(url);
+                    return urlObj.hostname + (urlObj.pathname !== '/' ? urlObj.pathname : '');
+                } catch (e) {
+                    return url;
+                }
+            }
+            
+            // Helper to adjust color brightness
+            function adjustColor(color, amount) {
+                return '#' + color.replace(/^#/, '')
+                    .match(/.{2}/g)
+                    .map(c => {
+                        const num = parseInt(c, 16);
+                        const newVal = Math.min(255, Math.max(0, num + amount));
+                        return newVal.toString(16).padStart(2, '0');
+                    })
+                    .join('');
+            }
+            
+            // Form submission handler
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                // Collect form data
+                const formData = {
+                    name: document.getElementById('name').value,
+                    title: document.getElementById('title').value,
+                    company: document.getElementById('company').value,
+                    email: document.getElementById('email').value,
+                    phone: document.getElementById('phone').value,
+                    website: document.getElementById('website').value,
+                    linkedIn: document.getElementById('linkedIn').value,
+                    accentColor: document.getElementById('accentColor').value
+                };
+                
+                // Generate QR code first
+                const qrCodeUrl = generateQRCode(formData);
+                
+                // Generate and render the business card
+                cardPreview.innerHTML = generateCard(formData, qrCodeUrl);
+                cardElement = cardPreview.querySelector('.business-card');
+                
+                // Show save instructions
+                saveInstructions.classList.remove('hidden');
+                
+                // Convert to image (this is client-side only and will display the image)
+                // Note: We're not actually downloading the file due to iframe restrictions
+                setTimeout(() => {
+                    html2canvas();
+                }, 200);
+            });
+            
+            // Simulate html2canvas functionality
+            function html2canvas() {
+                // In a real implementation, html2canvas would convert the card to an image
+                // Since we can't download in the iframe, we'll just make the card look like an image
+                cardElement.style.border = '1px solid #e2e8f0';
+                
+                // Add a small visual effect to indicate it's ready
+                cardElement.style.transition = 'all 0.3s ease';
+                cardElement.style.transform = 'scale(1.02)';
+                setTimeout(() => {
+                    cardElement.style.transform = 'scale(1)';
+                }, 300);
+            }
+        });
+    </script>
+</body>
+</html>
